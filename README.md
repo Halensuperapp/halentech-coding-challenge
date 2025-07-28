@@ -9,6 +9,9 @@
 
 ### **Challenge Overview: Rideshare Service Microservice**
 
+⚠️ Please note excessive use of AI will disqualify an assessment from review. ⚠️
+
+
 You're tasked with designing and building a **Rideshare Microservice** that powers ride booking, driver-rider coordination, and live tracking within the **Halen Super App**.
 
 This challenge will evaluate your ability to:
