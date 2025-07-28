@@ -1,127 +1,174 @@
-# 🧪 Full-Stack Coding Assessment
+## **Senior Backend Code Challenge – Halen Super App (Rideshare Microservice)**
 
-Welcome, and thanks for your interest in joining **Halen Technologies** 🎉
+### **Estimated Time: 2.5–3.5 Hours**
 
-This take-home assessment is designed to give you the flexibility to showcase your skills across the **frontend, backend, and tooling** — in a real-world, midsize organization context. We’re more interested in your thought process and code quality than a "perfect" solution.
-
-⚠️ Please note **excessive use of AI will disqualify an assessment from review.** ⚠️
-
----
-
-## 📘 The Scenario
-
-You're a new engineer at **Halen Technologies**, and your team manages internal tools for customer onboarding.
-
-They've asked you to build a feature to help support agents track and manage onboarding tickets. The tool will help them review, update, and search tickets in a lightweight dashboard.
+**Position:** Senior Backend Engineer (Node.js)  
+**Focus:** Architecture, performance, scalability, clean code, and domain logic
 
 ---
 
-## 📋 Your Task
+### **Challenge Overview: Rideshare Service Microservice**
 
-You are free to use any language or framework.
+You're tasked with designing and building a **Rideshare Microservice** that powers ride booking, driver-rider coordination, and live tracking within the **Halen Super App**.
 
-### 1. Backend
+This challenge will evaluate your ability to:
 
-Build an API with the following endpoints:
+* Architect a clean, scalable system
 
-- `GET /tickets` — List all tickets
-- `GET /tickets/:id` — Retrieve a specific ticket
-- `PATCH /tickets/:id` — Update ticket `status` and `notes`
+* Handle real-world ride lifecycle logic
 
-Each **ticket** should include:
+* Secure and validate endpoints
 
-| Field         | Type     |
-|---------------|----------|
-| `id`          | string or int |
-| `customerName`| string   |
-| `email`       | string   |
-| `createdAt`   | ISO string |
-| `status`      | "open" \| "pending" \| "done" |
-| `notes`       | string   |
+* Handle geospatial and time-series data
 
-### 2. Frontend
-
-Create a simple UI that allows:
-
-- Viewing a list of tickets
-- Viewing and editing ticket details (status + notes)
-- (Optional) Searching or filtering by name/email/status
-
-You may use any frontend stack (React, Vue, Svelte, plain HTML, etc).
-
-### 3. Tooling
-
-- Provide a script that seeds the backend with some mock ticket data (can be `.sh`, `.js`, `.ts`, etc).
-- Optionally, include Docker or other tooling to simplify setup.
+* Communicate assumptions and decisions clearly
 
 ---
 
-## ✅ What We’re Looking For
+### **Core Functional Requirements**
 
-| Area         | What We Value                           |
-|--------------|------------------------------------------|
-| **Clarity**   | Easy-to-read code and structure         |
-| **Maintainability** | Logical organization, no overengineering |
-| **User Experience** | Clean UI, reasonable UX            |
-| **Testing**   | Tests where appropriate (unit/integration) |
-| **Tooling**   | Ease of setup and developer experience  |
+#### **1\. Authentication \+ Role-Based Access**
 
-Bonus points for:
-- Type safety or schema validation
-- Clean commit history
-- Responsive UI or accessibility
-- CI setup
+* `POST /auth/register` — Register as a **rider** or **driver**
+
+* `POST /auth/login` — Return a **JWT token**
+
+* Secure all endpoints
+
+* Add role-based access control:
+
+  * Riders can **create rides**
+
+  * Drivers can **accept and update rides**
 
 ---
 
-## 🧪 Seed Data (Example)
+#### **2\. Ride Lifecycle Management**
 
-Here’s a sample ticket you can use for reference:
+* `POST /rides` — Rider creates a new ride request  
+   Fields: pickup address, dropoff address, ride type (e.g. “standard”, “premium”)
 
-```json
-{
-  "id": 1,
-  "customerName": "Jane Doe",
-  "email": "jane.doe@example.com",
-  "createdAt": "2024-01-15T12:00:00Z",
-  "status": "open",
-  "notes": ""
-}
-```
+* `PATCH /rides/:id/accept` — Driver accepts the ride *(status becomes `accepted`)*
 
-## 🚀 Setup Instructions
+* `PATCH /rides/:id/start` — Driver starts the ride *(status becomes `in_progress`)*
 
-You can use the stack you're most comfortable with. Here's a general flow if you're using Node.js:
+* `PATCH /rides/:id/complete` — Driver completes ride *(status becomes `completed`)*
 
-```bash
-# Clone this repo
-git clone https://github.com/yourusername/coding-assessment.git
+* `PATCH /rides/:id/cancel` — Rider or driver cancels *(status becomes `cancelled`)*
 
-# Install backend & frontend dependencies
-cd backend && npm install
-cd ../frontend && npm install
+* `GET /rides/:id` — Retrieve ride info (including status, assigned driver, ETA, and last location)
 
-# Seed mock data
-cd ../scripts && node seed.js
+Ride status flow:
 
-# Start backend
-cd ../backend && npm run dev
+requested → accepted → in\_progress → completed  
+(requested → cancelled is allowed)
 
-# Start frontend
-cd ../frontend && npm run dev
-```
+---
 
-## 🧪 Testing
-Add any test commands here (e.g., npm test, yarn test, etc). Include clear instructions in a TESTING.md file if needed.
+#### **3\. Live Location Tracking**
 
-## ⌛ Time Expectations
-We expect this to take around 2–4 hours, depending on how much polish or extra functionality you want to add.
+* `POST /rides/:id/locations` — Driver adds live location update  
+   Fields: timestamp, latitude, longitude, optional accuracy
 
-Don’t worry about production-hardening everything—just show us how you think and build.
+* `GET /rides/:id/locations` — Retrieve full location history for a ride
 
-## 📮 Submission
-Please send us a link to your GitHub repo (public or private with access) or a ZIP of your project. Include a short writeup at the top of your README or in a separate `NOTES.md`:
+---
 
-1. How to run the app
-2. Your technical choices
-3. Anything you'd do with more time
+#### **4\. ETA Calculation**
+
+* On `GET /rides/:id`, include:
+
+  * **Remaining distance** (via Haversine formula)
+
+  * **Average speed** over last 3 location updates
+
+  * **Estimated time remaining** (simple logic: `distance / speed`)
+
+---
+
+### **Technical Constraints**
+
+* **Use Node.js \+ Express** (NestJS acceptable)
+
+* **Use JWT for authentication**
+
+* **Use MongoDB** or **PostgreSQL**
+
+* Apply **MVC or layered architecture**
+
+* Add **validation** using Joi, Zod, or similar
+
+* Handle errors and invalid states gracefully
+
+---
+
+### 
+
+### **Advanced Considerations (Bonus for Senior-Level)**
+
+Implement one or more of the following advanced features:
+
+#### **🧩 Microservice Mindset**
+
+* Add a simple `ride.events.log` array per ride OR simulate an event bus by logging events (e.g., `ride.accepted`, `ride.completed`)
+
+* (Optional) Explain how this service would publish ride events in a real distributed system (Kafka, RabbitMQ, etc.)
+
+#### **⚡ Real-Time with WebSockets**
+
+* Broadcast location updates or ride status changes to a connected rider client via WebSocket (or Socket.IO)
+
+#### **📦 Dockerization**
+
+* Include a `Dockerfile` and `docker-compose.yml` for running locally
+
+#### **✅ Testing**
+
+* Add **unit tests** for auth and ride routes (e.g., using Jest, Mocha)
+
+* Use mock data or stubs for driver/rider separation
+
+#### **🚨 Rate Limiting**
+
+* Add basic rate limiting per IP or user (e.g., `express-rate-limit`)
+
+#### **📈 Performance Scaling Prompt**
+
+In your README:
+
+Briefly describe how you would scale this service to support **10,000 concurrent rides**, including location updates every 3 seconds.
+
+---
+
+### **📬 Deliverables**
+
+* ✅ GitHub repo link
+
+* ✅ Clear, concise **README** with:
+
+  * Setup instructions (including `.env`)  
+  * API route list with sample requests/responses  
+  * Description of design decisions  
+  * Notes on scalability or trade-offs
+
+**(Optional: include Postman collection, seed script, or test runner)**
+
+---
+
+**Evaluation Rubric (Used by Top Companies)**
+
+| Category | What We’re Looking For | Weight |
+| :---- | :---- | :---- |
+| Architecture | Scalable, modular, well-structured codebase | 🔥 High |
+| Domain Modeling | Proper role handling, lifecycle states, event flow | 🔥 High |
+| API Design | RESTful, consistent, properly documented | 🔥 High |
+| Business Logic | ETA, geolocation handling, role restrictions | High |
+| Code Quality | Clean, readable, maintainable, DRY | High |
+| Security | Proper JWT auth, role-based access, protected endpoints | Medium |
+| Testing | Coverage of critical paths | Medium |
+| Documentation | Clarity and completeness of README/API docs | Medium |
+| Bonus Features | WebSocket, Docker, microservice thinking, CI/CD | Bonus |
+
+### **Closing Tip**
+
+Treat this like you're coding one part of a larger production system. Keep it clean, write like a team will build on this, and document your thought process.
